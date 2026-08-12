@@ -26,7 +26,7 @@ let urlDatabase = {
 // Detail sukses untuk membedakan direct/proxy
 let successDetails = new Map(); // Map<url, {method: 'direct'|'proxy', timestamp, responseSize}>
 
-// Response details untuk domain utama
+// Response details untuk domain utama (TANPA CACHE)
 let domainResponseDetails = new Map(); // Map<domain, {status, method, responsePreview, timestamp}>
 
 let processingHistory = [];
@@ -131,16 +131,12 @@ const buildProxyUrl = (u) => {
   return `${baseUrl}/${u}`;
 };
 
-// ────────────── FUNGSI CEK DOMAIN UTAMA DENGAN PROXY ──────────────
+// ────────────── FUNGSI CEK DOMAIN UTAMA (TANPA CACHE - SELALU REALTIME) ──────────────
 async function checkDomain(url) {
   const domain = extractDomain(url);
   if (!domain) return null;
   
-  // Cek cache
-  if (domainResponseDetails.has(domain)) {
-    return domainResponseDetails.get(domain);
-  }
-  
+  // 🟢 TANPA CACHE - SELALU REQUEST REALTIME
   console.log(`🌐 Checking domain: ${domain}`);
   
   let domainStatus = {
@@ -217,7 +213,7 @@ async function checkUrl(url) {
   // Tandai sebagai pending
   urlDatabase.pending.add(url);
   
-  // AMBIL RESPONSE DARI DOMAIN UTAMA (dengan proxy fallback)
+  // AMBIL RESPONSE DARI DOMAIN UTAMA (REALTIME - TANPA CACHE)
   const domainStatus = await checkDomain(url);
   
   const result = {
@@ -367,7 +363,7 @@ function exportDatabase(format = 'json') {
     if (domainEntries.length > 0) {
       domainEntries.forEach(([domain, info]) => {
         const methodText = info.method === 'direct' ? 'Direct' : (info.method === 'proxy' ? 'Proxy' : 'Failed');
-        domainSection += `# ${domain} - Status: ${info.status} (${methodText})\n`;
+        domainSection += `# ${domain} - Status: ${info.status} (${methodText}) - ${info.timestamp}\n`;
       });
     } else {
       domainSection += '# No domain responses recorded\n';
