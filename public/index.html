@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Runner - Lockdown Sell</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e1a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #141b2d;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #1e2a3a;
+        }
+
+        .header h1 {
+            color: #e2e8f0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8em;
+        }
+
+        .badge-info {
+            background: #2d3748;
+            color: #a0aec0;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            margin-left: 15px;
+            border: 1px solid #4a5568;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #48bb78;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #141b2d;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+            border: 1px solid #1e2a3a;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #4a5568;
+        }
+
+        .stat-card.green {
+            border-color: #48bb78;
+        }
+        .stat-card.green .stat-number {
+            color: #48bb78;
+        }
+
+        .stat-card.red {
+            border-color: #f56565;
+        }
+        .stat-card.red .stat-number {
+            color: #f56565;
+        }
+
+        .stat-card.blue {
+            border-color: #4299e1;
+        }
+        .stat-card.blue .stat-number {
+            color: #4299e1;
+        }
+
+        .stat-card.purple {
+            border-color: #9f7aea;
+        }
+        .stat-card.purple .stat-number {
+            color: #9f7aea;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            color: #a0aec0;
+        }
+
+        .progress-section {
+            background: #141b2d;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 1px solid #1e2a3a;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #1e2a3a;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+            display: flex;
+        }
+
+        .progress-segment {
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .progress-segment[style*="width: 0%"] {
+            display: none;
+        }
+
+        .progress-segment:first-child {
+            border-radius: 15px 0 0 15px;
+        }
+
+        .progress-segment:last-child {
+            border-radius: 0 15px 15px 0;
+        }
+
+        .progress-segment:only-child {
+            border-radius: 15px;
+        }
+
+        .segment-success { background: #48bb78; }
+        .segment-failed { background: #f56565; }
+
+        .domain-section {
+            background: #141b2d;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 1px solid #1e2a3a;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1e2a3a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #e2e8f0;
+        }
+
+        .section-title .count {
+            font-size: 0.8em;
+            color: #4a5568;
+            font-weight: normal;
+        }
+
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #1e2a3a;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
+        .domain-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .domain-table th {
+            background: #1e2a3a;
+            color: #a0aec0;
+            padding: 10px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid #2d3748;
+        }
+
+        .domain-table td {
+            padding: 10px;
+            border-bottom: 1px solid #1e2a3a;
+            color: #e2e8f0;
+        }
+
+        .domain-table tr:hover td {
+            background: #1a2335;
+        }
+
+        .status-200 {
+            color: #48bb78;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: #f56565;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #ecc94b;
+            font-weight: bold;
+        }
+
+        .url-categories {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .category-card {
+            background: #141b2d;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #1e2a3a;
+        }
+
+        .category-card.active {
+            border-color: #667eea;
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .category-card.success { 
+            border-color: #48bb78;
+        }
+        .category-card.success.active {
+            background: #1a3a2a;
+        }
+        
+        .category-card.failed { 
+            border-color: #f56565;
+        }
+        .category-card.failed.active {
+            background: #3a1a2a;
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #e2e8f0;
+        }
+
+        .category-count {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e2e8f0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #48bb78; color: #0a0e1a; }
+        .btn-warning { background: #ecc94b; color: #0a0e1a; }
+        .btn-danger { background: #f56565; color: white; }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .main-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .url-list-container {
+            background: #141b2d;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #1e2a3a;
+        }
+
+        .url-list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .url-list-container::-webkit-scrollbar-track {
+            background: #1e2a3a;
+            border-radius: 4px;
+        }
+
+        .url-list-container::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        .url-list-container::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
+        .url-list-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1e2a3a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #e2e8f0;
+        }
+
+        .url-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #1e2a3a;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .url-item:hover {
+            background: #1a2335;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .badge-success { background: #48bb78; color: #0a0e1a; }
+        .badge-failed { background: #f56565; color: white; }
+
+        .url-text {
+            flex: 1;
+            color: #a0aec0;
+            word-break: break-all;
+            font-size: 0.9em;
+            font-family: monospace;
+        }
+
+        .timestamp {
+            color: #4a5568;
+            font-size: 0.8em;
+            margin-left: 15px;
+            white-space: nowrap;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+
+        .footer span {
+            color: #718096;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #1e2a3a;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            background: #0a0e1a;
+            color: #e2e8f0;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-box::placeholder {
+            color: #4a5568;
+        }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #1e2a3a;
+            color: #a0aec0;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #e2e8f0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4a5568;
+        }
+
+        .text-muted {
+            color: #4a5568;
+            font-size: 0.85em;
+        }
+
+        .text-green {
+            color: #48bb78;
+        }
+
+        .text-red {
+            color: #f56565;
+        }
+
+        .text-blue {
+            color: #4299e1;
+        }
+
+        .text-yellow {
+            color: #ecc94b;
+        }
+
+        .method-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .method-direct {
+            background: #48bb78;
+            color: #0a0e1a;
+        }
+
+        .method-proxy {
+            background: #4299e1;
+            color: white;
+        }
+
+        .method-failed {
+            background: #f56565;
+            color: white;
+        }
+
+        .method-pending {
+            background: #ecc94b;
+            color: #0a0e1a;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .url-categories {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                URL Runner - Lockdown Sell
+                <span class="badge-info">Direct → Proxy → Failed</span>
+                <span class="live-indicator"></span>
+            </h1>
+
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <div class="stat-label">SUCCESS</div>
+                    <div class="stat-number" id="totalSuccess">0</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-label">FAILED</div>
+                    <div class="stat-number" id="failedCount">0</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-label">PENDING</div>
+                    <div class="stat-number" id="pendingCount">0</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-label">SUCCESS RATE</div>
+                    <div class="stat-number" id="successRate">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <span style="font-weight: bold; font-size: 1.1em; color: #e2e8f0;">Success vs Failed Ratio</span>
+                </div>
+                <div style="display: flex; gap: 20px;">
+                    <span style="color: #48bb78;">
+                        <strong>Success:</strong> <span id="successPercent">0%</span>
+                    </span>
+                    <span style="color: #f56565;">
+                        <strong>Failed:</strong> <span id="failedPercent">0%</span>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="progress-bar" style="margin-bottom: 10px;">
+                <div class="progress-segment segment-success" id="successProgress" style="width: 0%">
+                    <span id="successProgressText">0%</span>
+                </div>
+                <div class="progress-segment segment-failed" id="failedProgress" style="width: 0%">
+                    <span id="failedProgressText">0%</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #0a0e1a; padding: 12px; border-radius: 8px; margin-top: 10px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                    <div>
+                        <span style="color: #4a5568; font-size: 0.9em;">Success</span>
+                        <div style="font-weight: bold; font-size: 1.2em; color: #48bb78;">
+                            <span id="totalSuccessDetail">0</span> URLs
+                        </div>
+                        <div style="font-size: 0.85em; color: #4a5568; margin-top: 3px;">
+                            Direct: <span id="directCountDetail">0</span> · Proxy: <span id="proxyCountDetail">0</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="color: #4a5568; font-size: 0.9em;">Failed</span>
+                        <div style="font-weight: bold; font-size: 1.2em; color: #f56565;">
+                            <span id="failedCountDetail">0</span> URLs
+                        </div>
+                    </div>
+                    <div>
+                        <span style="color: #4a5568; font-size: 0.9em;">Pending</span>
+                        <div style="font-weight: bold; font-size: 1.2em; color: #4299e1;">
+                            <span id="pendingCountDetail">0</span> URLs
+                        </div>
+                    </div>
+                    <div>
+                        <span style="color: #4a5568; font-size: 0.9em;">Total Processed</span>
+                        <div style="font-weight: bold; font-size: 1.2em; color: #9f7aea;">
+                            <span id="totalProcessedDetail">0</span> URLs
+                        </div>
+                    </div>
+                </div>
+                <div style="background: #1a2335; padding: 8px 15px; border-radius: 20px; border: 1px solid #2d3748;">
+                    <span style="color: #9f7aea; font-weight: bold;">Success Rate: <span id="successRateDetail">0%</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain Responses Section -->
+        <div class="domain-section">
+            <div class="section-title">
+                <span>Domain Responses</span>
+                <span class="count"><span id="domainCount">0</span> domains</span>
+            </div>
+            <div class="table-container">
+                <table class="domain-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%;">Domain</th>
+                            <th style="width: 25%;">Status</th>
+                            <th style="width: 25%;">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="domainBody">
+                        <tr>
+                            <td colspan="3" class="loading">Loading domains...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="url-categories">
+            <div class="category-card success active" onclick="switchCategory('success')">
+                <div class="category-title">
+                    <span>SUCCESS</span>
+                    <span class="copy-btn" onclick="copyCategory('success'); event.stopPropagation();">Copy</span>
+                </div>
+                <div class="category-count" id="cardSuccessCount">0</div>
+                <div style="font-size: 0.9em; color: #4a5568; margin-top: 5px;">
+                    Direct: <span id="directCount">0</span> · Proxy: <span id="proxyCount">0</span>
+                </div>
+            </div>
+            <div class="category-card failed" onclick="switchCategory('failed')">
+                <div class="category-title">
+                    <span>FAILED</span>
+                    <span class="copy-btn" onclick="copyCategory('failed'); event.stopPropagation();">Copy</span>
+                </div>
+                <div class="category-count" id="cardFailedCount">0</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="refreshData()">Refresh</button>
+            <button class="btn btn-success" onclick="exportAll()">Export All</button>
+            <button class="btn btn-warning" onclick="toggleAutoRefresh()">Auto: ON</button>
+            <button class="btn btn-danger" onclick="resetDatabase()">Reset</button>
+        </div>
+
+        <div class="main-panel">
+            <!-- URL List Panel -->
+            <div class="url-list-container">
+                <div class="url-list-title">
+                    <span id="currentCategoryTitle">Success URLs</span>
+                    <span id="categoryCount">0 URLs</span>
+                </div>
+                
+                <input type="text" class="search-box" id="searchInput" placeholder="Search URLs..." onkeyup="searchUrls()">
+                
+                <div id="urlList">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+
+            <!-- History Panel -->
+            <div class="url-list-container">
+                <div class="url-list-title">
+                    <span>Processing History</span>
+                    <span id="historyCount">0 items</span>
+                </div>
+                
+                <div id="historyList">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Last update: <span id="lastUpdate">-</span> | Uptime: <span id="uptime">-</span> | Total Processed: <span id="totalProcessed">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let currentCategory = 'success';
+        let autoRefresh = true;
+        let refreshInterval = 3000;
+        let stats = {};
+        let urlCache = {};
+
+        // Load data from server
+        async function fetchStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                stats = data;
+                updateStats(data);
+            } catch (error) {
+                console.error('Failed to fetch stats:', error);
+            }
+        }
+
+        async function fetchUrls(category) {
+            try {
+                let endpoint = category;
+                if (category === 'success') {
+                    endpoint = 'success';
+                }
+                
+                const response = await fetch(`/api/urls/${endpoint}`);
+                const data = await response.json();
+                urlCache[category] = data.urls || [];
+                displayUrls(category, data.urls || [], data.details || {});
+                
+                document.getElementById('categoryCount').textContent = 
+                    `${data.urls?.length || 0} URLs`;
+            } catch (error) {
+                console.error(`Failed to fetch ${category} URLs:`, error);
+            }
+        }
+
+        async function fetchHistory() {
+            try {
+                const response = await fetch('/api/history?limit=50');
+                const history = await response.json();
+                displayHistory(history);
+                document.getElementById('historyCount').textContent = 
+                    `${history.length} items`;
+            } catch (error) {
+                console.error('Failed to fetch history:', error);
+            }
+        }
+
+        async function fetchConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                document.getElementById('uptime').textContent = 
+                    formatUptime(config.uptime);
+            } catch (error) {
+                console.error('Failed to fetch config:', error);
+            }
+        }
+
+        async function fetchDomains() {
+            try {
+                const response = await fetch('/api/domain-responses');
+                const data = await response.json();
+                displayDomains(data.domains);
+                document.getElementById('domainCount').textContent = data.total || 0;
+            } catch (error) {
+                console.error('Failed to fetch domains:', error);
+            }
+        }
+
+        // Display domains table
+        function displayDomains(domains) {
+            const tbody = document.getElementById('domainBody');
+            
+            if (!domains || Object.keys(domains).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="loading">No domains recorded yet</td></tr>';
+                return;
+            }
+
+            let html = '';
+            const entries = Object.entries(domains);
+            
+            entries.forEach(([domain, info]) => {
+                let statusClass = 'status-pending';
+                let statusText = 'PENDING';
+                if (info.ok) {
+                    statusClass = 'status-200';
+                    statusText = info.status + ' OK';
+                } else if (info.status && info.status !== 'error') {
+                    statusClass = 'status-error';
+                    statusText = info.status;
+                } else {
+                    statusClass = 'status-error';
+                    statusText = 'ERROR';
+                }
+
+                html += `
+                    <tr>
+                        <td style="word-break: break-all; font-family: monospace; font-size: 0.9em;">${escapeHtml(domain)}</td>
+                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td style="color: #4a5568; font-size: 0.8em;">${formatTime(info.timestamp)}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Update statistics display
+        function updateStats(data) {
+            const counts = data.counts || {};
+            const statsData = data.stats || {};
+            
+            const totalSuccess = counts.success || 0;
+            const failed = counts.failed || 0;
+            const pending = counts.pending || 0;
+            const direct = counts.direct || 0;
+            const proxy = counts.proxy || 0;
+            const totalProcessed = statsData.totalProcessed || 0;
+            
+            document.getElementById('totalSuccess').textContent = totalSuccess;
+            document.getElementById('failedCount').textContent = failed;
+            document.getElementById('pendingCount').textContent = pending;
+            
+            document.getElementById('totalSuccessDetail').textContent = totalSuccess;
+            document.getElementById('failedCountDetail').textContent = failed;
+            document.getElementById('pendingCountDetail').textContent = pending;
+            document.getElementById('totalProcessedDetail').textContent = totalProcessed;
+            
+            document.getElementById('directCountDetail').textContent = direct;
+            document.getElementById('proxyCountDetail').textContent = proxy;
+            
+            document.getElementById('cardSuccessCount').textContent = totalSuccess;
+            document.getElementById('cardFailedCount').textContent = failed;
+            
+            document.getElementById('directCount').textContent = direct;
+            document.getElementById('proxyCount').textContent = proxy;
+            
+            const total = totalSuccess + failed;
+            let successPercent = 0;
+            let failedPercent = 0;
+            
+            if (total > 0) {
+                successPercent = (totalSuccess / total * 100);
+                failedPercent = (failed / total * 100);
+            }
+            
+            const successPercentFixed = successPercent.toFixed(1);
+            const failedPercentFixed = failedPercent.toFixed(1);
+            
+            document.getElementById('successPercent').textContent = successPercentFixed + '%';
+            document.getElementById('failedPercent').textContent = failedPercentFixed + '%';
+            
+            const successProgress = document.getElementById('successProgress');
+            const failedProgress = document.getElementById('failedProgress');
+            const successText = document.getElementById('successProgressText');
+            const failedText = document.getElementById('failedProgressText');
+            
+            if (successPercent > 0) {
+                successProgress.style.width = successPercent + '%';
+                successText.textContent = successPercentFixed + '%';
+            } else {
+                successProgress.style.width = '0%';
+            }
+            
+            if (failedPercent > 0) {
+                failedProgress.style.width = failedPercent + '%';
+                failedText.textContent = failedPercentFixed + '%';
+            } else {
+                failedProgress.style.width = '0%';
+            }
+            
+            const totalAttempts = totalSuccess + failed;
+            const successRate = totalAttempts > 0 ? ((totalSuccess / totalAttempts) * 100).toFixed(1) : 0;
+            document.getElementById('successRate').textContent = successRate + '%';
+            document.getElementById('successRateDetail').textContent = successRate + '%';
+            
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Display URLs
+        function displayUrls(category, urls, details) {
+            const container = document.getElementById('urlList');
+            
+            if (!urls || urls.length === 0) {
+                container.innerHTML = '<div class="loading">No URLs in this category</div>';
+                return;
+            }
+
+            let html = '';
+            urls.slice(0, 100).forEach(url => {
+                let badgeClass = category === 'success' ? 'badge-success' : 'badge-failed';
+                let badgeText = category === 'success' ? 'SUCCESS' : 'FAILED';
+                
+                let methodTag = '';
+                if (category === 'success' && details && details[url]) {
+                    const method = details[url].method;
+                    methodTag = method === 'direct' 
+                        ? '<span class="method-tag method-direct">Direct</span>' 
+                        : '<span class="method-tag method-proxy">Proxy</span>';
+                }
+
+                html += `
+                    <div class="url-item">
+                        <span class="status-badge ${badgeClass}">${badgeText}</span>
+                        <span class="url-text">${escapeHtml(url)}</span>
+                        ${methodTag}
+                    </div>
+                `;
+            });
+
+            if (urls.length > 100) {
+                html += `<div class="url-item" style="color: #4a5568;">... and ${urls.length - 100} more</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Display history
+        function displayHistory(history) {
+            const container = document.getElementById('historyList');
+            
+            if (!history || history.length === 0) {
+                container.innerHTML = '<div class="loading">No history</div>';
+                return;
+            }
+
+            let html = '';
+            history.forEach(item => {
+                const status = item.status === 'success' ? 'SUCCESS' : 'FAILED';
+                const badgeClass = item.status === 'success' ? 'badge-success' : 'badge-failed';
+                let methodTag = '';
+                if (item.method === 'direct') {
+                    methodTag = '<span class="method-tag method-direct">Direct</span>';
+                } else if (item.method === 'proxy') {
+                    methodTag = '<span class="method-tag method-proxy">Proxy</span>';
+                }
+
+                html += `
+                    <div class="url-item">
+                        <span class="status-badge ${badgeClass}">${status}</span>
+                        <span class="url-text">${escapeHtml(item.url)}</span>
+                        ${methodTag}
+                        <span class="timestamp">${formatTime(item.timestamp)}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Switch category
+        function switchCategory(category) {
+            currentCategory = category;
+            
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            const titles = {
+                'success': 'Success URLs',
+                'failed': 'Failed URLs'
+            };
+            document.getElementById('currentCategoryTitle').textContent = titles[category];
+            
+            fetchUrls(category);
+        }
+
+        // Search URLs
+        function searchUrls() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const urls = urlCache[currentCategory] || [];
+            
+            if (!searchTerm) {
+                fetchUrls(currentCategory);
+                return;
+            }
+            
+            const filtered = urls.filter(url => 
+                url.toLowerCase().includes(searchTerm)
+            );
+            
+            displayUrls(currentCategory, filtered, {});
+            document.getElementById('categoryCount').textContent = 
+                `${filtered.length} URLs (filtered)`;
+        }
+
+        // Copy category URLs
+        async function copyCategory(category) {
+            try {
+                const response = await fetch(`/api/urls/${category}?format=txt`);
+                const text = await response.text();
+                await navigator.clipboard.writeText(text);
+                alert(`Category "${category}" URLs copied to clipboard!`);
+            } catch (error) {
+                console.error('Failed to copy:', error);
+                alert('Failed to copy URLs');
+            }
+        }
+
+        // Export all data
+        async function exportAll() {
+            try {
+                const response = await fetch('/api/export/txt');
+                const text = await response.text();
+                
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `url-export-${new Date().toISOString()}.txt`;
+                a.click();
+            } catch (error) {
+                console.error('Failed to export:', error);
+                alert('Failed to export data');
+            }
+        }
+
+        // Reset database
+        async function resetDatabase() {
+            if (confirm('Are you sure you want to reset the entire database?')) {
+                try {
+                    const response = await fetch('/api/reset', { method: 'POST' });
+                    const result = await response.json();
+                    alert('Database reset successfully!');
+                    refreshData();
+                } catch (error) {
+                    console.error('Failed to reset database:', error);
+                    alert('Failed to reset database');
+                }
+            }
+        }
+
+        // Toggle auto refresh
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            const btn = event.target;
+            btn.textContent = autoRefresh ? 'Auto: ON' : 'Auto: OFF';
+        }
+
+        // Refresh all data
+        function refreshData() {
+            fetchStats();
+            fetchUrls(currentCategory);
+            fetchHistory();
+            fetchConfig();
+            fetchDomains();
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString();
+        }
+
+        function formatUptime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${hours}h ${minutes}m ${secs}s`;
+        }
+
+        // Initialize
+        function init() {
+            refreshData();
+            
+            setInterval(() => {
+                if (autoRefresh) {
+                    refreshData();
+                }
+            }, refreshInterval);
+        }
+
+        init();
+    </script>
+</body>
+</html>
